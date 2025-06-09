@@ -26,6 +26,7 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
+        console.error("Login error:", error);
         setError("Invalid credentials");
         return;
       }
@@ -33,6 +34,7 @@ export default function LoginPage() {
       router.push("/dashboard");
       router.refresh();
     } catch (error) {
+      console.error("Login error:", error);
       setError("Something went wrong");
     } finally {
       setLoading(false);
@@ -43,6 +45,7 @@ export default function LoginPage() {
     try {
       await signIn(provider, { callbackUrl: "/dashboard" });
     } catch (error) {
+      console.error("Login error:", error);
       setError("Something went wrong with social login");
     }
   };
@@ -156,7 +159,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center mt-6 text-gray-600">
-          Don't have an account?{" "}
+          Dont have an account?{" "}
           <a href="/register" className="text-blue-600 hover:text-blue-800 font-medium transition-colors">
             Create one
           </a>
