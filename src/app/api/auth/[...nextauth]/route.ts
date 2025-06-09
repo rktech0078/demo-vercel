@@ -1,5 +1,4 @@
-import { NextAuthOptions } from "next-auth";
-import NextAuth from "next-auth/next";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -8,7 +7,7 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-export const authOptions: NextAuthOptions = {
+const handler = NextAuth({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -22,7 +21,7 @@ export const authOptions: NextAuthOptions = {
       name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -31,8 +30,8 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: {
-            email: credentials.email
-          }
+            email: credentials.email,
+          },
         });
 
         if (!user || !user?.password) {
@@ -49,8 +48,8 @@ export const authOptions: NextAuthOptions = {
         }
 
         return user;
-      }
-    })
+      },
+    }),
   ],
   pages: {
     signIn: "/login",
@@ -64,7 +63,7 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "google" || account?.provider === "facebook") {
         try {
           const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! }
+            where: { email: user.email! },
           });
 
           if (!existingUser) {
@@ -72,8 +71,8 @@ export const authOptions: NextAuthOptions = {
               data: {
                 email: user.email!,
                 name: user.name || "",
-                password: "", // Social login users don't need password
-              }
+                password: "", // For social login users
+              },
             });
           }
           return true;
@@ -83,10 +82,8 @@ export const authOptions: NextAuthOptions = {
         }
       }
       return true;
-    }
-  }
-};
+    },
+  },
+});
 
-const handler = NextAuth(authOptions);
-
-export { handler as GET, handler as POST }; 
+export { handler as GET, handler as POST };
